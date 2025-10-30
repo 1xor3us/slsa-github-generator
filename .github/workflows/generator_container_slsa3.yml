@@ -277,11 +277,13 @@ jobs:
             export COSIGN_REPOSITORY="${UNTRUSTED_PROVENANCE_REPOSITORY}"
           fi
 
-          COSIGN_EXPERIMENTAL=1 \
-          cosign attest --predicate="$predicate_name" \
+          cosign attest \
+            --predicate "$predicate_name" \
             --type slsaprovenance \
             --yes \
+            --keyless \
             "${UNTRUSTED_IMAGE}@${UNTRUSTED_DIGEST}"
+
 
       - name: Final outcome
         id: final
