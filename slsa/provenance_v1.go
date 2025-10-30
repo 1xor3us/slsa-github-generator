@@ -20,7 +20,6 @@ import (
 	"regexp"
 
 	intoto "github.com/in-toto/in-toto-golang/in_toto"
-	slsacommon "github.com/in-toto/in-toto-golang/in_toto/slsa_provenance/common"
 	slsa1 "github.com/in-toto/in-toto-golang/in_toto/slsa_provenance/v1"
 )
 
@@ -51,9 +50,6 @@ func NewHostedActionsGenerator(bt BuildType) *HostedActionsGenerator {
 
 // Generate generates an in-toto provenance statement in SLSA v0.2 format.
 func (g *HostedActionsGenerator) GenerateV1(ctx context.Context) (*intoto.ProvenanceStatement, error) {
-	// NOTE: Use buildType as the audience as that closely matches the intended
-	// recipient of the OIDC token.
-	// NOTE: GitHub doesn't allow github.com in the audience so remove it.
 	audience := githubComReplace.ReplaceAllString(g.buildType.URI(), "")
 
 	oidcClient, err := g.clients.OIDCClient()
@@ -61,14 +57,12 @@ func (g *HostedActionsGenerator) GenerateV1(ctx context.Context) (*intoto.Proven
 		return nil, err
 	}
 
-	// We allow nil OIDC client to support e2e tests on pull requests.
 	builderID := GithubHostedActionsBuilderID
 	if oidcClient != nil {
 		t, err := oidcClient.Token(ctx, []string{audience})
 		if err != nil {
 			return nil, err
 		}
-
 		if t.JobWorkflowRef != "" {
 			builderID = fmt.Sprintf("https://github.com/%s", t.JobWorkflowRef)
 		}
@@ -94,7 +88,7 @@ func (g *HostedActionsGenerator) GenerateV1(ctx context.Context) (*intoto.Proven
 		return nil, err
 	}
 
-	// Convertir []common.ProvenanceMaterial → []slsa1.ResourceDescriptor
+	// Conversion []common.ProvenanceMaterial → []slsa1.ResourceDescriptor
 	deps := make([]slsa1.ResourceDescriptor, len(materials))
 	for i, m := range materials {
 		deps[i] = slsa1.ResourceDescriptor{
@@ -114,7 +108,7 @@ func (g *HostedActionsGenerator) GenerateV1(ctx context.Context) (*intoto.Proven
 			PredicateType: slsa1.PredicateSLSAProvenance,
 			Subject:       subject,
 		},
-		Predicate: slsa1.ProvenancePredicate{
+		Predicate: any(slsa1.ProvenancePredicate{
 			BuildDefinition: slsa1.ProvenanceBuildDefinition{
 				BuildType: g.buildType.URI(),
 				ExternalParameters: map[string]interface{}{
@@ -122,19 +116,20 @@ func (g *HostedActionsGenerator) GenerateV1(ctx context.Context) (*intoto.Proven
 				},
 				ResolvedDependencies: deps,
 			},
-			RunDetails: slsa1.RunDetails{
+			RunDetails: slsa1.ProvenanceRunDetails{
 				Builder: slsa1.Builder{
 					ID: builderID,
 				},
-				Metadata: &slsa1.Metadata{
+				BuildMetadata: slsa1.BuildMetadata{
 					InvocationID: invocation.ConfigSource.URI,
 					StartedOn:    metadata.BuildStartedOn,
 					FinishedOn:   metadata.BuildFinishedOn,
 				},
 			},
-		},
+		}),
 	}, nil
 }
+
 
 // WithClients overrides the default ClientProvider. Useful for tests where
 // clients are not available.
