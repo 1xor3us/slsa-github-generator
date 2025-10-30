@@ -277,12 +277,9 @@ jobs:
             export COSIGN_REPOSITORY="${UNTRUSTED_PROVENANCE_REPOSITORY}"
           fi
 
-          cosign attest \
-            --predicate "$predicate_name" \
-            --type slsaprovenance \
-            --yes \
-            --keyless \
-            "${UNTRUSTED_IMAGE}@${UNTRUSTED_DIGEST}"
+          cosign attest --predicate "$predicate_name" \
+          --type slsaprovenance \
+          "${UNTRUSTED_IMAGE}@${UNTRUSTED_DIGEST}"
 
 
       - name: Final outcome
