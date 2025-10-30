@@ -102,13 +102,13 @@ func (g *HostedActionsGenerator) GenerateV1(ctx context.Context) (*intoto.Proven
 		return nil, err
 	}
 
-	return &intoto.ProvenanceStatement{
+	return &intoto.ProvenanceStatementSLSA1{
 		StatementHeader: intoto.StatementHeader{
 			Type:          intoto.StatementInTotoV01,
 			PredicateType: slsa1.PredicateSLSAProvenance,
 			Subject:       subject,
 		},
-		Predicate: any(slsa1.ProvenancePredicate{
+		Predicate: slsa1.ProvenancePredicate{
 			BuildDefinition: slsa1.ProvenanceBuildDefinition{
 				BuildType: g.buildType.URI(),
 				ExternalParameters: map[string]interface{}{
@@ -126,7 +126,7 @@ func (g *HostedActionsGenerator) GenerateV1(ctx context.Context) (*intoto.Proven
 					FinishedOn:   metadata.BuildFinishedOn,
 				},
 			},
-		}),
+		},
 	}, nil
 }
 
