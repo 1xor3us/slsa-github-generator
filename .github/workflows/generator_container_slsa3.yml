@@ -278,7 +278,7 @@ jobs:
           fi
 
           cosign attest --predicate "$predicate_name" \
-          --type slsaprovenance \
+          --type slsaprovenance1 \
           "${UNTRUSTED_IMAGE}@${UNTRUSTED_DIGEST}"
 
 
