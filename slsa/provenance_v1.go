@@ -94,6 +94,15 @@ func (g *HostedActionsGenerator) GenerateV1(ctx context.Context) (*intoto.Proven
 		return nil, err
 	}
 
+	// Convertir []common.ProvenanceMaterial → []slsa1.ResourceDescriptor
+	deps := make([]slsa1.ResourceDescriptor, len(materials))
+	for i, m := range materials {
+		deps[i] = slsa1.ResourceDescriptor{
+			URI:    m.URI,
+			Digest: m.Digest,
+		}
+	}
+
 	metadata, err := g.buildType.Metadata(ctx)
 	if err != nil {
 		return nil, err
@@ -111,17 +120,16 @@ func (g *HostedActionsGenerator) GenerateV1(ctx context.Context) (*intoto.Proven
 				ExternalParameters: map[string]interface{}{
 					"config": buildConfig,
 				},
-				ResolvedDependencies: materials,
+				ResolvedDependencies: deps,
 			},
-			RunDetails: slsa1.ProvenanceRunDetails{
-				Builder: slsa1.ProvenanceBuilder{
+			RunDetails: slsa1.RunDetails{
+				Builder: slsa1.Builder{
 					ID: builderID,
 				},
-				Metadata: &slsa1.ProvenanceMetadata{
-					InvocationID:  invocation.ConfigSource.URI,
-					StartedOn:     metadata.BuildStartedOn,
-					FinishedOn:    metadata.BuildFinishedOn,
-					Completeness:  slsa1.ProvenanceComplete{},
+				Metadata: &slsa1.Metadata{
+					InvocationID: invocation.ConfigSource.URI,
+					StartedOn:    metadata.BuildStartedOn,
+					FinishedOn:   metadata.BuildFinishedOn,
 				},
 			},
 		},
