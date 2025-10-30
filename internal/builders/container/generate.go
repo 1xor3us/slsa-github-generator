@@ -67,7 +67,7 @@ that it is being run in the context of a Github Actions workflow.`,
 				g.WithClients(&slsa.NilClientProvider{})
 			}
 
-			p, err := g.Generate(ctx)
+			p, err := g.GenerateV1(ctx)
 			check(err)
 
 			pb, err := json.Marshal(p.Predicate)
