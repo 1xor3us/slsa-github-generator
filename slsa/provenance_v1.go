@@ -49,7 +49,7 @@ func NewHostedActionsGenerator(bt BuildType) *HostedActionsGenerator {
 }
 
 // Generate generates an in-toto provenance statement in SLSA v0.2 format.
-func (g *HostedActionsGenerator) GenerateV1(ctx context.Context) (*intoto.ProvenanceStatement, error) {
+func (g *HostedActionsGenerator) GenerateV1(ctx context.Context) (*intoto.ProvenanceStatementSLSA1, error) {
 	audience := githubComReplace.ReplaceAllString(g.buildType.URI(), "")
 
 	oidcClient, err := g.clients.OIDCClient()
