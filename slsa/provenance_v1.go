@@ -48,7 +48,7 @@ func NewHostedActionsGenerator(bt BuildType) *HostedActionsGenerator {
 	}
 }
 
-// Generate generates an in-toto provenance statement in SLSA v0.2 format.
+// Generate generates an in-toto provenance statement in SLSA v1 format.
 func (g *HostedActionsGenerator) GenerateV1(ctx context.Context) (*intoto.ProvenanceStatementSLSA1, error) {
 	audience := githubComReplace.ReplaceAllString(g.buildType.URI(), "")
 
@@ -129,7 +129,6 @@ func (g *HostedActionsGenerator) GenerateV1(ctx context.Context) (*intoto.Proven
 		},
 	}, nil
 }
-
 
 // WithClients overrides the default ClientProvider. Useful for tests where
 // clients are not available.
